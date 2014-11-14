@@ -1,8 +1,8 @@
 Tasks = new Mongo.Collection("tasks");
-if (Meteor.isClient) {
-// This code only runs on the client
-  Meteor.subscribe("tasks");
 
+if (Meteor.isClient) {
+  // This code only runs on the client
+  Meteor.subscribe("tasks");
   Template.body.helpers({
 
     tasks: function () {
@@ -32,6 +32,7 @@ if (Meteor.isClient) {
       // This function is called when the new task form is submitted
       var text = event.target.text.value;
       Meteor.call("addTask", text);
+        Meteor.call("githubRequest");
       // Clear form
       event.target.text.value = "";
       // Prevent default form submit
@@ -107,9 +108,21 @@ Meteor.methods({
   }
 
     Tasks.update(taskId, { $set: { private: setToPrivate } });
-  }
+  },
+  githubRequest: function () {
+    try{
+    this.unblock();
+    Meteor.http.call("GET", "https://api.github.com/repos/murraycat/meteor_practice/issues",function(err,result){
+    
 
-});
+    console.log(result.data.Object);
+  }) ;
+  } catch(e){
+    }
+  }
+  });
+
+
 if (Meteor.isServer) {
   Meteor.publish("tasks", function () {
    return Tasks.find({
