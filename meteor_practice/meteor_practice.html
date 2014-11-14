@@ -10,7 +10,10 @@
       	<input type="text" name="text" placeholder="Type to add new tasks" />
       </form>
     </header>
-
+    <label class="hide-completed">
+	<input type="checkbox" checked="{{hideCompleted}}"/>
+    Hide Completed Tasks
+    </label>	
     <ul>
       {{#each tasks}}
         {{> task}}
