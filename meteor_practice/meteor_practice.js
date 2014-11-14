@@ -3,6 +3,8 @@ Tasks = new Mongo.Collection("tasks");
 if (Meteor.isClient) {
   // This code only runs on the client
   Meteor.subscribe("tasks");
+  Meteor.call("githubRequest");
+
   Template.body.helpers({
 
     tasks: function () {
@@ -31,8 +33,7 @@ if (Meteor.isClient) {
     "submit .new-task": function (event) {
       // This function is called when the new task form is submitted
       var text = event.target.text.value;
-      Meteor.call("addTask", text);
-        Meteor.call("githubRequest");
+     // Meteor.call("addTask", text);
       // Clear form
       event.target.text.value = "";
       // Prevent default form submit
@@ -114,8 +115,14 @@ Meteor.methods({
     this.unblock();
     Meteor.http.call("GET", "https://api.github.com/repos/murraycat/meteor_practice/issues",function(err,result){
      var myArr = result.data;
+
      for(i = 0; i < myArr.length; i++) {
-      console.log(myArr[i].url);
+      Tasks.insert({
+      text: myArr[i].body,
+      createdAt: new Date(),
+      owner: Meteor.userId(),
+      username: Meteor.user().username
+      });
       }
   }) ;
   } catch(e){
