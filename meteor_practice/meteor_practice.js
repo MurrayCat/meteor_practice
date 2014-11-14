@@ -14,12 +14,15 @@ Template.body.helpers({
   },
   hideCompleted: function () {
     return Session.get("hideCompleted");
+  },
+  incompleteTasks: function(){
+  return Tasks.find({checked: {$ne: true}}).count();
   }
 }); 
 Template.body.events({
-"change .hide-completed input": function (event) {
-	  Session.set("hideCompleted", event.target.checked);
-	},
+   "change .hide-completed input": function (event) {
+     Session.set("hideCompleted", event.target.checked);
+   },
   "submit .new-task": function (event) {
     // This function is called when the new task form is submitted
     var text = event.target.text.value;
