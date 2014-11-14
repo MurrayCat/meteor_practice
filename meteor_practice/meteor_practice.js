@@ -113,9 +113,10 @@ Meteor.methods({
     try{
     this.unblock();
     Meteor.http.call("GET", "https://api.github.com/repos/murraycat/meteor_practice/issues",function(err,result){
-    
-
-    console.log(result.data.Object);
+     var myArr = result.data;
+     for(i = 0; i < myArr.length; i++) {
+      console.log(myArr[i].url);
+      }
   }) ;
   } catch(e){
     }
