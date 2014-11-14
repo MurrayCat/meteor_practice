@@ -6,14 +6,17 @@
   <div class="container">
     <header>
       <h1>Todo List ({{incompleteTasks}})</h1>
+     {{#if currentUser}}
       <form class="new-task">
       	<input type="text" name="text" placeholder="Type to add new tasks" />
       </form>
+     {{/if}}	
     </header>
     <label class="hide-completed">
 	<input type="checkbox" checked="{{hideCompleted}}"/>
     Hide Completed Tasks
     </label>	
+    {{>loginButtons}}
     <ul>
       {{#each tasks}}
         {{> task}}
@@ -27,6 +30,6 @@
 
     <input type="checkbox" checked="{{checked}}" class="toggle-checked" />
 
-    <span class="text">{{text}}</span>
+   <span class="text"><strong>{{username}}</strong> - {{text}}</span>
   </li>
 </template>
