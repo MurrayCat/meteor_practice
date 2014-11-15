@@ -21,18 +21,29 @@ dy {
   max-width: 600px;
   margin: 0 auto;
   min-height: 100%;
-  background: white;
+  background: #272725;
+  color:white;
+}
+a{
+  color: #fff;
+  text-decoration: none;
 }
 
 header {
-  background: #d2edf4;
-  background-image: linear-gradient(to bottom, #d0edf5, #e1e5f0 100%);
+  background: #005bc4;
+  background-image: linear-gradient(to bottom, #505bc4, #005bc4 100%);
+
   padding: 20px 15px 15px 15px;
   position: relative;
 }
 
 #login-buttons {
   display: block;
+}
+button{
+  background: #007f32;
+  color: white;
+  display: inline-block;
 }
 
 h1 {
@@ -56,7 +67,7 @@ form {
   border: none;
   width: 100%;
   padding-right: 80px;
-  font-size: 1em;
+  font-size: 0.8em;
 }
 
 .new-task input:focus{
@@ -82,11 +93,13 @@ li {
   position: relative;
   list-style: none;
   padding: 15px;
+  background: #272725;
   border-bottom: #eee solid 1px;
 }
 
 li .text {
   margin-left: 10px;
+  font-size:15px;
 }
 
 li.checked {
@@ -124,5 +137,6 @@ header .hide-completed {
     padding-bottom: 5px;
   }
 }
+
 
 

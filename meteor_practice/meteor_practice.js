@@ -28,6 +28,7 @@ if (Meteor.isClient) {
 
   });
 
+
   Template.body.events({
 
     "submit .new-task": function (event) {
@@ -35,6 +36,7 @@ if (Meteor.isClient) {
       var text = event.target.text.value;
      // Meteor.call("addTask", text);
       // Clear form
+       Meteor.call("githubRepos", text);
       event.target.text.value = "";
       // Prevent default form submit
       return false;
@@ -116,28 +118,38 @@ Meteor.methods({
     Meteor.http.call("GET", "https://api.github.com/repos/murraycat/meteor_practice/issues",function(err,result){
      var myArr = result.data;
 
+    
+  }) ;
+  } catch(e){
+    }
+  },
+   githubRepos: function (user_name) {
+    try{
+    this.unblock();
+    Tasks.remove({owner:Meteor.userId()});
+    Meteor.http.call("GET", "https://api.github.com/users/"+user_name+"/repos",function(err,result){
+     var myArr = result.data;
+     console.log(result.data);
+    
      for(i = 0; i < myArr.length; i++) {
       Tasks.insert({
-      text: myArr[i].body,
+      text: myArr[i].description,
       createdAt: new Date(),
       owner: Meteor.userId(),
-      username: Meteor.user().username
+      username: myArr[i].full_name,
+      url: myArr[i].clone_url
       });
       }
   }) ;
   } catch(e){
     }
   }
+
   });
 
 
 if (Meteor.isServer) {
   Meteor.publish("tasks", function () {
-   return Tasks.find({
-    $or: [
-      { private: {$ne: true} },
-      { owner: this.userId }
-    ]
-  });
+   return Tasks.find({owner: this.userId});
   });
 }
