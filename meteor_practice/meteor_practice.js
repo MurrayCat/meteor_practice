@@ -1,17 +1,17 @@
 Tasks = new Mongo.Collection("tasks");
+var token;
 if (Meteor.isClient) {
   // This code only runs on the client
   Meteor.subscribe("tasks");
 
-  Meteor.call("getAuthCode",window.location.href+"");
-
+  
   var authCode;
   var url = window.location.href;
   var n = url.indexOf("code=")+5;
   if(n!=4) {
   authCode=url.substring(n,url.length); 
-  console.log(authCode);
-  console.log(url);
+  Meteor.call("authenticate", authCode);
+
   }
 
   Template.body.helpers({
@@ -179,15 +179,25 @@ Meteor.methods({
   }) ;
   } catch(e){
     }
-  },
-   getAuthCode: function(url){ 
+  }
+  ,authenticate: function (authCode) {
+     try{
+      this.unblock();
+      Meteor.http.call("POST", "https://github.com/login/oauth/access_token",
+          {data: {client_id: "ID", client_secret: "SECRET",code: authCode }},
+          function (error, result) {
+            if (!error) {
+              
+            }
+            console.log(result);
+          });       
 
-    var n = url.indexOf("="); 
-    authCode=url.substring(n,url.length); 
+  } catch(e){
+     alert(e);
     }
-  
+  }
 
-  });
+});
 
 
 if (Meteor.isServer) {
