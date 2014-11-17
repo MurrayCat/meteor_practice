@@ -1,5 +1,6 @@
 Tasks = new Mongo.Collection("tasks");
 var token;
+
 if (Meteor.isClient) {
   // This code only runs on the client
   Meteor.subscribe("tasks");
@@ -10,9 +11,11 @@ if (Meteor.isClient) {
   var n = url.indexOf("code=")+5;
   if(n!=4) {
   authCode=url.substring(n,url.length); 
-  Meteor.call("authenticate", authCode);
-
+  Meteor.call("authenticateGithub", authCode);
+  console.log(authCode);
   }
+  
+  
 
   Template.body.helpers({
 
@@ -53,9 +56,9 @@ if (Meteor.isClient) {
     "change .hide-completed input": function (event) {
       Session.set("hideCompleted", event.target.checked);
     },
-    "click .login-button": function(){
+    /*"click .login-button": function(){
       window.open('https://github.com/login/oauth/authorize?client_id=83d7d25834d9f658c7ba')
-    }
+    }*/
   });
 
   Template.task.events({
@@ -102,12 +105,54 @@ if (Meteor.isClient) {
       }
     }
   });
-
+/*
   Accounts.ui.config({
     passwordSignupFields: "USERNAME_ONLY"
   });
+Accounts.loginServiceConfiguration.remove({
+    service : 'github'
+});
 
+Accounts.loginServiceConfiguration.insert({
+    service : 'github',
+    clientId: 'YOUR CLIENT ID',
+    secret  : 'YOUR SECRET ID'
+});
+Accounts.onCreateUser(function(options,user){
+    var accessToken = user.services.github.accessToken,
+        result,
+        profile;
 
+    result = Meteor.http.get('https://api.github.com/user',{
+        params : {
+            access_token : accessToken
+        },
+        headers: {"User-Agent": "Meteor/1.0"}
+    });
+
+    if(result.error){
+        console.log(result);
+        throw result.error
+    }
+
+    profile = _.pick(result.data,
+        'login',
+        'name',
+        'avatar_url',
+        'url',
+        'company',
+        'blog',
+        'location',
+        'email',
+        'bio',
+        'html_url'
+    );
+
+    user.profile = profile;
+
+    return user;
+});
+*/
 
 }
 Meteor.methods({
@@ -180,20 +225,52 @@ Meteor.methods({
   } catch(e){
     }
   }
-  ,authenticate: function (authCode) {
-     try{
+  ,authenticateGithub: function (authCode) {
+     this.unblock();
+      var client_id = "";
+      var client_secret ='';
+    try{
+            //header: { 'Access-Control-Allow-Origin': "*" },
       this.unblock();
-      Meteor.http.call("POST", "https://github.com/login/oauth/access_token",
-          {data: {client_id: "ID", client_secret: "SECRET",code: authCode }},
+      var url = "https://github.com/login/oauth/access_token";
+        var formData = new FormData();
+       
+        formData.append('client_id', client_id);
+        formData.append('client_secret', client_secret);
+        formData.append('code', authCode);
+
+       
+        var invocation = new XMLHttpRequest();
+        invocation.open('POST', url, true);
+        invocation.withCredentials = "true";
+        invocation.setRequestHeader('Access-Control-Allow-Origin', '*');
+        
+        invocation.onload = function(e) {
+          if (this.status == 200) {
+            console.log(this.response);
+          }
+        };
+        invocation.send(formData);
+         /*
+       Meteor.http.call("POST", "https://github.com/login/oauth/access_token",
+        { data:{
+        client_id: client_id, //your GitHub client_id
+        client_secret: client_secret,  //and secret
+        code: authCode} ,headers:{'Access-Control-Allow-Origin': "*",'Accept': 'application/json'}  },
           function (error, result) {
+            Session.set('external_server_data', result);
             if (!error) {
-              
+              console.log(result);
             }
-            console.log(result);
-          });       
+          });   
+          */    
+      
+
+
+    
 
   } catch(e){
-     alert(e);
+     console.log(e);
     }
   }
 

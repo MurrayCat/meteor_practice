@@ -6,7 +6,6 @@
   <div class="container">
     <header>
       <h1>Items ({{incompleteTasks}})</h1>
-      <button class="login-button">Log in to github</button>	
      {{#if currentUser}}
       <form class="new-task">
       	<input type="text" name="text" placeholder="Github username" />
@@ -16,8 +15,7 @@
     <label class="hide-completed">
 	<input type="checkbox" checked="{{hideCompleted}}"/>
     Hide Completed Tasks
-    </label>
-
+    </label>	
     {{#if isOwner}}
   <button class="toggle-private">
     {{#if private}}

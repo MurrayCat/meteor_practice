@@ -8,3 +8,5 @@ accounts-ui
 accounts-password
 http
 insecure
+accounts-github
+
