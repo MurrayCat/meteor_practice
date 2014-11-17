@@ -1,14 +1,24 @@
 Tasks = new Mongo.Collection("tasks");
-
 if (Meteor.isClient) {
   // This code only runs on the client
   Meteor.subscribe("tasks");
-   Template.body.helpers({
+
+  Meteor.call("getAuthCode",window.location.href+"");
+
+  var authCode;
+  var url = window.location.href;
+  var n = url.indexOf("code=")+5;
+  if(n!=4) {
+  authCode=url.substring(n,url.length); 
+  console.log(authCode);
+  console.log(url);
+  }
+
+  Template.body.helpers({
 
     tasks: function () {
-  
-     if (Session.get("hideCompleted")) {
-     // If hide completed is checked, filter tasks
+      if (Session.get("hideCompleted")) {
+      // If hide completed is checked, filter tasks
       return Tasks.find({checked: {$ne: true}}, {sort: {createdAt: -1}});
       } 
       else {
@@ -42,6 +52,9 @@ if (Meteor.isClient) {
     },
     "change .hide-completed input": function (event) {
       Session.set("hideCompleted", event.target.checked);
+    },
+    "click .login-button": function(){
+      window.open('https://github.com/login/oauth/authorize?client_id=83d7d25834d9f658c7ba')
     }
   });
 
@@ -50,11 +63,6 @@ if (Meteor.isClient) {
     "click .toggle-checked": function () {
     // Set the checked property to the opposite of its current value
       Meteor.call("setChecked", this._id, ! this.checked);
-   	if(!this.checked){
-	// Close issue
-
-	//Meteor.call("closeIssue", this.issue_number);
-	} 
     },
     "click .delete": function () {
       Meteor.call("deleteTask", this._id);
@@ -98,7 +106,8 @@ if (Meteor.isClient) {
   Accounts.ui.config({
     passwordSignupFields: "USERNAME_ONLY"
   });
- 
+
+
 
 }
 Meteor.methods({
@@ -156,7 +165,6 @@ Meteor.methods({
     Tasks.remove({owner:Meteor.userId()});
     Meteor.http.call("GET", "https://api.github.com/repos/"+user_name+"/issues",function(err,result){
      var myArr = result.data;
-    console.log(myArr);
     for(i = 0; i < myArr.length; i++) {
       Tasks.insert({
       text: "",
@@ -164,15 +172,19 @@ Meteor.methods({
       owner: Meteor.userId(),
       username: myArr[i].title,
       url: myArr[i].clone_url,
-      isRepo: 0,
-      issue_number: myArr[i].number
+      isRepo: 0
 
       });
     }
   }) ;
   } catch(e){
     }
-  }
+  },
+   getAuthCode: function(url){ 
+
+    var n = url.indexOf("="); 
+    authCode=url.substring(n,url.length); 
+    }
   
 
   });
