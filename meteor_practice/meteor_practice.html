@@ -10,12 +10,12 @@
       <form class="new-task">
       	<input type="text" name="text" placeholder="Github username" />
       </form>
-     {{/if}}	
+     {{/if}}
     </header>
     <label class="hide-completed">
 	<input type="checkbox" checked="{{hideCompleted}}"/>
     Hide Completed Tasks
-    </label>	
+    </label>
     {{#if isOwner}}
   <button class="toggle-private">
     {{#if private}}
@@ -31,13 +31,47 @@
         {{> task}}
       {{/each}}
     </ul>
+
   </div>
+  {{#if isSessionRepo}}
+  <div class="closed_container">
+    <header>
+      <h1>Clossed issues</h1>
+    </header>
+    <ul>
+      {{#each closed_issues}}
+        {{> closed_issue}}
+      {{/each}}
+    </ul>
+  </div>
+  {{/if}}
 </body>
 <template name="task">
   <li class="{{#if checked}}checked{{/if}} {{#if private}}private{{/if}}">
       {{#if isNotRepo}}
      <button class="delete">&times;</button>
-  
+
+     <input type="checkbox" checked="{{checked}}" class="toggle-checked" />
+    {{/if}}
+
+  <a href={{url}}><span class="text"><strong>{{username}}</strong>  {{text}}</span></a>
+  {{#if isOwner}}
+    {{#if isRepo}}
+       {{#if hasIssues}}
+      <button class="toggle-private">
+        Issues
+      </button>
+       {{/if}}
+    {{/if}}
+  {{/if}}
+  </li>
+</template>
+
+<template name="closed_issue">
+  <li class="{{#if checked}}checked{{/if}} {{#if private}}private{{/if}}">
+      {{#if isNotRepo}}
+     <button class="delete">&times;</button>
+
      <input type="checkbox" checked="{{checked}}" class="toggle-checked" />
     {{/if}}
 

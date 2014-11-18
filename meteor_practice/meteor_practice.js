@@ -1,4 +1,5 @@
 Tasks = new Mongo.Collection("tasks");
+ClosedIssues = new Mongo.Collection("closed_issues");
 var token;
 
 if (Meteor.isClient) {
@@ -26,7 +27,10 @@ if (Meteor.isClient) {
 
     incompleteTasks: function () {
       return Tasks.find({checked: {$ne: true}}).count();
-    }
+    },
+    isSessionRepo: function () {
+        return Session.get("Repo");
+      }
 
   });
 
@@ -66,33 +70,33 @@ if (Meteor.isClient) {
   Template.task.helpers({
     isOwner: function () {
       return this.owner === Meteor.userId();
-    }
-  });
-  Template.task.helpers({
+    },
     hasIssues: function () {
       if(this.number_of_issues>0){
         return true;
       }
-    }
-  });
-  Template.task.helpers({
+    },
     isRepo: function () {
       if (this.isRepo==0){
+        Session.set("Repo", true);
         return false;
       }else{
+        Session.set("Repo", false);
         return true;
       }
-    }
-  });
-  Template.task.helpers({
+    },
     isNotRepo: function () {
       if (this.isRepo==0){
+        Session.set("Repo", false);
         return true;
       }else{
+        Session.set("Repo", true);
         return false;
       }
     }
   });
+
+
 
   Accounts.ui.config({
     passwordSignupFields: "USERNAME_ONLY"
@@ -144,6 +148,7 @@ Meteor.methods({
     Tasks.remove({owner:Meteor.userId()});
     Meteor.http.call("GET", "https://api.github.com/users/"+user_name+"/repos",function(err,result){
     var myArr = result.data;
+    Session.set("Repo", false);
     for(i = 0; i < myArr.length; i++) {
         Tasks.insert({
         text: myArr[i].description,
@@ -163,6 +168,7 @@ Meteor.methods({
     try{
     this.unblock();
     Tasks.remove({owner:Meteor.userId()});
+    Session.set("Repo", true);
     Meteor.http.call("GET", "https://api.github.com/repos/"+user_name+"/issues",function(err,result){
      var myArr = result.data;
      console.log(myArr);
@@ -187,7 +193,7 @@ Meteor.methods({
       this.unblock();
       Meteor.http.call("PATCH",
         "https://api.github.com/repos/MurrayCat/meteor_practice/issues/"+number,{data:{state:state} ,
-        headers:{'Accept':'application/vnd.github.v3.raw+json','Content-Type':'application/json;charset=UTF-8','Authorization':'token TOKEN'}},
+        headers:{'Accept':'application/vnd.github.v3.raw+json','Content-Type':'application/json;charset=UTF-8','Authorization':'token #'}},
         function (error, result) {
         Session.set('external_server_data', result);
           if (!error) {
