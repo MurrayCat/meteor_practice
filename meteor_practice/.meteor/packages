@@ -9,4 +9,5 @@ accounts-password
 http
 insecure
 accounts-github
+linto:jquery-ui
 

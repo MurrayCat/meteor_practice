@@ -1,10 +1,20 @@
 Tasks = new Mongo.Collection("tasks");
 ClosedIssues = new Mongo.Collection("closed_issues");
 var token;
-
+$(function() {
+ $( "#draggable" ).draggable();
+ $( "#droppable" ).droppable({
+   drop: function( event, ui ) {
+     $( this )
+       .find( "h1" )
+         .html( "Dropped!" );
+   }
+ });
+});
 if (Meteor.isClient) {
   // This code only runs on the client
   Meteor.subscribe("tasks");
+  Meteor.subscribe("closed_issues");
 
 
 
@@ -18,6 +28,16 @@ if (Meteor.isClient) {
       else {
       // Otherwise, return all of the tasks
         return Tasks.find({}, {sort: {createdAt: -1}});
+      }
+    },
+    closed_issues: function (){
+      if (Session.get("hideCompleted")) {
+      // If hide completed is checked, filter tasks
+      return ClosedIssues.find({checked: {$ne: false}}, {sort: {createdAt: -1}});
+      }
+      else {
+      // Otherwise, return all of the tasks
+        return ClosedIssues.find({}, {sort: {createdAt: -1}});
       }
     },
 
@@ -35,6 +55,7 @@ if (Meteor.isClient) {
   });
 
 
+
   Template.body.events({
 
     "submit .new-task": function (event) {
@@ -43,6 +64,7 @@ if (Meteor.isClient) {
      // Meteor.call("addTask", text);
       // Clear form
        Meteor.call("githubRepos", text);
+
       event.target.text.value = "";
       // Prevent default form submit
       return false;
@@ -116,6 +138,16 @@ Meteor.methods({
       throw new Meteor.Error("not-authorized");
     }
     Meteor.call("CloseGithubIssues",task.issue_number,"closed");
+    ClosedIssues.insert({
+    text: task.text,
+    createdAt: new Date(),
+    owner: Meteor.userId(),
+    username: task.username,
+    url: task.url,
+    isRepo: task.isRepo,
+    issue_number:task.issue_number
+    });
+
     Tasks.remove(taskId);
 
   },
@@ -126,7 +158,7 @@ Meteor.methods({
       throw new Meteor.Error("not-authorized");
     }
     if(setChecked){
-    Meteor.call("CloseGithubIssues",task.issue_number,"closed");
+    Meteor.call("deleteTask",taskId);
     }else{
       Meteor.call("CloseGithubIssues",task.issue_number,"open");
     }
@@ -172,6 +204,7 @@ Meteor.methods({
     Meteor.http.call("GET", "https://api.github.com/repos/"+user_name+"/issues",function(err,result){
      var myArr = result.data;
      console.log(myArr);
+
     for(i = 0; i < myArr.length; i++) {
       Tasks.insert({
       text: "",
@@ -185,15 +218,17 @@ Meteor.methods({
       });
     }
   }) ;
-  } catch(e){
-    }
+  }
+  catch(e){
+    console.log(e);
+  }
   },
    CloseGithubIssues: function (number, state) {
     try{
       this.unblock();
       Meteor.http.call("PATCH",
         "https://api.github.com/repos/MurrayCat/meteor_practice/issues/"+number,{data:{state:state} ,
-        headers:{'Accept':'application/vnd.github.v3.raw+json','Content-Type':'application/json;charset=UTF-8','Authorization':'token #'}},
+        headers:{'Accept':'application/vnd.github.v3.raw+json','Content-Type':'application/json;charset=UTF-8','Authorization':'token '}},
         function (error, result) {
         Session.set('external_server_data', result);
           if (!error) {
@@ -213,5 +248,8 @@ Meteor.methods({
 if (Meteor.isServer) {
   Meteor.publish("tasks", function () {
    return Tasks.find({owner: this.userId});
+  });
+  Meteor.publish("closed_issues", function () {
+   return ClosedIssues.find({owner: this.userId});
   });
 }
