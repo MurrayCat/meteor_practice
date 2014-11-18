@@ -5,17 +5,17 @@ if (Meteor.isClient) {
   // This code only runs on the client
   Meteor.subscribe("tasks");
 
-  
-  var authCode;
+
+  /*var authCode;
   var url = window.location.href;
   var n = url.indexOf("code=")+5;
   if(n!=4) {
-  authCode=url.substring(n,url.length); 
+  authCode=url.substring(n,url.length);
   Meteor.call("authenticateGithub", authCode);
   console.log(authCode);
-  }
-  
-  
+  }*/
+
+
 
   Template.body.helpers({
 
@@ -23,7 +23,7 @@ if (Meteor.isClient) {
       if (Session.get("hideCompleted")) {
       // If hide completed is checked, filter tasks
       return Tasks.find({checked: {$ne: true}}, {sort: {createdAt: -1}});
-      } 
+      }
       else {
       // Otherwise, return all of the tasks
         return Tasks.find({}, {sort: {createdAt: -1}});
@@ -33,7 +33,7 @@ if (Meteor.isClient) {
     hideCompleted: function () {
       return Session.get("hideCompleted");
     },
-    
+
     incompleteTasks: function () {
       return Tasks.find({checked: {$ne: true}}).count();
     }
@@ -105,10 +105,14 @@ if (Meteor.isClient) {
       }
     }
   });
-/*
+
   Accounts.ui.config({
     passwordSignupFields: "USERNAME_ONLY"
   });
+
+
+
+/*
 Accounts.loginServiceConfiguration.remove({
     service : 'github'
 });
@@ -173,7 +177,7 @@ Meteor.methods({
     }
     Tasks.update(taskId, { $set: { checked: setChecked} });
   },
- 
+
   githubRequest: function () {
     try{
     this.unblock();
@@ -225,33 +229,57 @@ Meteor.methods({
   } catch(e){
     }
   }
-  ,authenticateGithub: function (authCode) {
-     this.unblock();
-      var client_id = "";
-      var client_secret ='';
+  ,closeGithubIssue: function (issue_number) {
     try{
-            //header: { 'Access-Control-Allow-Origin': "*" },
       this.unblock();
+/*
+      var client_id = "";
+      var client_secret ="";
+      var formData = new FormData();
+
+      formData.append('client_id', client_id);
+      formData.append('client_secret', client_secret);
+      formData.append('code', authCode);
+      var token =  getAccessToken(formData);
+      console.log(token);
+*/
+
+          Meteor.http.call("PATCH",
+            "https://api.github.com/repos/MurrayCat/meteor_practice/issues/"+issue_number,{data:{state:'closed'} ,
+            headers:{'Accept':'application/vnd.github.v3.raw+json','Content-Type':'application/json;charset=UTF-8','Authorization':'token '}},
+          function (error, result) {
+            Session.set('external_server_data', result);
+            if (!error) {
+              console.log(result);
+            }
+          });
+          /* if (result.error) // if the http response was an error
+          throw result.error;
+          if (result.data.error) // if the http response was a json object with an error attribute
+          throw result.data;
+          console.log( result.data.access_token);
+
+            //header: { 'Access-Control-Allow-Origin': "*" },
       var url = "https://github.com/login/oauth/access_token";
         var formData = new FormData();
-       
+
         formData.append('client_id', client_id);
         formData.append('client_secret', client_secret);
         formData.append('code', authCode);
 
-       
+
         var invocation = new XMLHttpRequest();
         invocation.open('POST', url, true);
         invocation.withCredentials = "true";
         invocation.setRequestHeader('Access-Control-Allow-Origin', '*');
-        
+
         invocation.onload = function(e) {
           if (this.status == 200) {
             console.log(this.response);
           }
         };
         invocation.send(formData);
-         /*
+
        Meteor.http.call("POST", "https://github.com/login/oauth/access_token",
         { data:{
         client_id: client_id, //your GitHub client_id
@@ -262,13 +290,8 @@ Meteor.methods({
             if (!error) {
               console.log(result);
             }
-          });   
-          */    
-      
-
-
-    
-
+          });
+          */
   } catch(e){
      console.log(e);
     }
