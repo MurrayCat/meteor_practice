@@ -49,10 +49,24 @@ if (Meteor.isClient) {
 
    this.$('.droppable').droppable({
       drop: function( event, ui ) {
-        $( this )
-      
+        /*  $( this )
           .find( "h1" )
-            .html( "Issue reopened" );
+            .html( "Issue reopened" );*/
+        var text =ui.draggable[0].innerText;
+        var issue=ClosedIssues.findOne({username:text});
+        Meteor.call("CloseGithubIssues",issue.issue_number,"open");
+
+        Tasks.insert({
+        text: issue.text,
+        createdAt: new Date(),
+        owner: Meteor.userId(),
+        username: issue.username,
+        url: issue.url,
+        isRepo: issue.isRepo,
+        issue_number:issue.issue_number}
+        );
+        ui.draggable[0].classList.add("hidden");
+        Meteor.call("deleteIssue",issue._id);
       }
     });
    }
@@ -154,9 +168,13 @@ Meteor.methods({
     isRepo: task.isRepo,
     issue_number:task.issue_number
     });
-
+    console.log(task);
     Tasks.remove(taskId);
 
+
+  },
+  deleteIssue: function (issueId) {
+    ClosedIssues.remove(issueId);
   },
   setChecked: function (taskId, setChecked) {
     var task = Tasks.findOne(taskId);
@@ -211,7 +229,6 @@ Meteor.methods({
     Meteor.http.call("GET", "https://api.github.com/repos/"+user_name+"/issues",function(err,result){
      var myArr = result.data;
      console.log(myArr);
-
     for(i = 0; i < myArr.length; i++) {
       Tasks.insert({
       text: "",
@@ -235,7 +252,7 @@ Meteor.methods({
       this.unblock();
       Meteor.http.call("PATCH",
         "https://api.github.com/repos/MurrayCat/meteor_practice/issues/"+number,{data:{state:state} ,
-        headers:{'Accept':'application/vnd.github.v3.raw+json','Content-Type':'application/json;charset=UTF-8','Authorization':'token '}},
+        headers:{'Accept':'application/vnd.github.v3.raw+json','Content-Type':'application/json;charset=UTF-8','Authorization':'token 272518caca9648442aebdf213f178720ba01cb9b'}},
         function (error, result) {
         Session.set('external_server_data', result);
           if (!error) {
@@ -259,5 +276,4 @@ if (Meteor.isServer) {
   Meteor.publish("closed_issues", function () {
    return ClosedIssues.find({owner: this.userId});
   });
-
 }

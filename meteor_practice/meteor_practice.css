@@ -14,6 +14,14 @@ dy {
   background: #272725;
   color:white;
 }
+.issue{
+  color: #272725;
+
+}
+.hidden{
+   display: none;
+   background: #fff;
+}
 .closed_container{
   width: 500px;
   float:right;
