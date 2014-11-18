@@ -32,7 +32,6 @@ jquery@1.0.1
 json@1.0.1
 launch-screen@1.0.0
 less@1.0.11
-linto:jquery-ui@1.11.2
 livedata@1.0.11
 localstorage@1.0.1
 logging@1.0.5
@@ -42,6 +41,7 @@ minifiers@1.1.2
 minimongo@1.0.5
 mobile-status-bar@1.0.1
 mongo@1.0.8
+mrt:jquery-ui@1.9.2
 npm-bcrypt@0.7.7
 oauth2@1.1.1
 oauth@1.1.2

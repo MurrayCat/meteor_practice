@@ -3,8 +3,21 @@
 </head>
 
 <body>
-  <div class="container">
+  {{#if isSessionRepo}}
+  <div class="closed_container" id="droppable">
     <header>
+      <h1>Clossed issues</h1>
+    </header>
+    <ul>
+      {{#each closed_issues}}
+        {{> closed_issue}}
+      {{/each}}
+    </ul>
+  </div>
+  {{/if}}
+
+  <div class="container">
+    <header class="droppable">
       <h1>Items ({{incompleteTasks}})</h1>
      {{#if currentUser}}
       <form class="new-task">
@@ -31,27 +44,15 @@
         {{> task}}
       {{/each}}
     </ul>
+  </div>
 
-  </div>
-  {{#if isSessionRepo}}
-  <div class="closed_container" id="droppable">
-    <header>
-      <h1>Clossed issues</h1>
-    </header>
-    <ul>
-      {{#each closed_issues}}
-        {{> closed_issue}}
-      {{/each}}
-    </ul>
-  </div>
-  {{/if}}
 </body>
-<template name="task">
-  <li id="draggable" class="{{#if checked}}checked{{/if}} {{#if private}}private{{/if}}">
+<template name="task" >
+  <li class="{{#if checked}}checked{{/if}} {{#if private}}private{{/if}}">
       {{#if isNotRepo}}
      <button class="delete">&times;</button>
 
-     <input type="checkbox" checked="{{checked}}" class="toggle-checked" />
+     <input type="checkbox" checked="{{checked}}" class="toggle-checked"  />
     {{/if}}
 
   <a href={{url}}><span class="text"><strong>{{username}}</strong>  {{text}}</span></a>
@@ -68,12 +69,7 @@
 </template>
 
 <template name="closed_issue">
-  <li class="{{#if checked}}checked{{/if}} {{#if private}}private{{/if}}">
-
-
-
-
+  <li  class="draggable">
   <a href={{url}}><span class="text"><strong>{{username}}</strong>  {{text}}</span></a>
-
   </li>
 </template>

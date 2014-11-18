@@ -1,16 +1,8 @@
 Tasks = new Mongo.Collection("tasks");
 ClosedIssues = new Mongo.Collection("closed_issues");
-var token;
-$(function() {
- $( "#draggable" ).draggable();
- $( "#droppable" ).droppable({
-   drop: function( event, ui ) {
-     $( this )
-       .find( "h1" )
-         .html( "Dropped!" );
-   }
- });
-});
+
+
+
 if (Meteor.isClient) {
   // This code only runs on the client
   Meteor.subscribe("tasks");
@@ -53,6 +45,18 @@ if (Meteor.isClient) {
       }
 
   });
+  Template.body.rendered = function() {
+
+   this.$('.droppable').droppable({
+      drop: function( event, ui ) {
+        $( this )
+      
+          .find( "h1" )
+            .html( "Issue reopened" );
+      }
+    });
+   }
+
 
 
 
@@ -117,7 +121,10 @@ if (Meteor.isClient) {
       }
     }
   });
+ Template.closed_issue.rendered = function() {
 
+  this.$('.draggable').draggable();
+  }
 
 
   Accounts.ui.config({
@@ -252,4 +259,5 @@ if (Meteor.isServer) {
   Meteor.publish("closed_issues", function () {
    return ClosedIssues.find({owner: this.userId});
   });
+
 }
